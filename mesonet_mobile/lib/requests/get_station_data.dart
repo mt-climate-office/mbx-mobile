@@ -14,3 +14,28 @@ class NetworkService {
         }
     }
 }
+
+Future<Map<String, dynamic>> getForecast(double lat, double lon) async {
+  final response = await http.get(
+    Uri.parse("https://api.weather.gov/points/$lat,$lon")
+  );
+  if (response.statusCode == 200) {
+      final initResp = json.decode(response.body);
+      final forecastResp = await http.get(
+        Uri.parse(initResp['properties']['forecast'])
+      );
+
+      if (forecastResp.statusCode == 200) {
+        return json.decode(forecastResp.body);
+      } else {
+        throw Exception('Forecast API call failed with status code $response.statusCode');
+      }
+  } else {
+    throw Exception('Forecast API call failed with status code $response.statusCode');
+  }
+}
+
+void main() async {
+    Map<String, dynamic> forecast = await getForecast(39.7456, -97.0892);
+    print(forecast);
+}
